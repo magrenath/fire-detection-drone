@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 
+
 # ----------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------
@@ -40,7 +41,7 @@ def draw_hsv(flow_hsv):
     hsv_draw[..., 2] = np.minimum(v * 4, 255)
     bgr_draw = cv2.cvtColor(hsv_draw, cv2.COLOR_HSV2BGR)
 
-    return bgr_draw
+    return bgr_draw, v, ang
 
 
 # ----------------------------------------------
@@ -60,7 +61,7 @@ cv2.createTrackbar('U - V', "Trackbars", 255, 255, nothing)
 while True:
     # read source image
     _, frame = cap.read()
-    # convert sourece image to HSC color mode
+    # convert source image to HSC color mode
     hsv_trackbars = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     l_h = cv2.getTrackbarPos("L - H", "Trackbars")
@@ -95,7 +96,6 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
-
 # ----------------------------------------------
 # 2nd OBJECT FLOW
 # ----------------------------------------------
@@ -116,18 +116,49 @@ while True:
     result_bgr = cv2.cvtColor(result, cv2.COLOR_HSV2BGR)
     gray = cv2.cvtColor(result_bgr, cv2.COLOR_BGR2GRAY)
 
-    flow = cv2.calcOpticalFlowFarneback(prevgray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-    prevgray = gray
+    flow = cv2.calcOpticalFlowFarneback(prevgray, original_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+    prevgray = original_gray
 
-    flow2 = cv2.flip(draw_flow(gray, flow),1)
-    original_gray_flow = cv2.flip(draw_flow(original_gray, flow),1)
-    img2 = cv2.flip(img,1)
-    flow_HSV = cv2.flip(draw_hsv(flow),1)
+    flow2 = cv2.flip(draw_flow(gray, flow), 1)
+    original_gray_flow = cv2.flip(draw_flow(original_gray, flow), 1)
+    img2 = cv2.flip(img, 1)
+
+    bgr_draw, v, ang = draw_hsv(flow)
+    flow_HSV = cv2.flip(bgr_draw, 1)
 
     cv2.imshow('Flow Masked', flow2)
-    cv2.imshow('Flow Image', original_gray_flow)
+    # cv2.imshow('Flow Image', original_gray_flow)
     cv2.imshow('RGB Image', img2)
-    cv2.imshow('Flow HSV', flow_HSV)
+    # cv2.imshow('Flow HSV', flow_HSV)
+
+#Média dos vetores da matriz e apresentacao do seu valor
+    v_no_move=[]
+    v_move=[]
+    ang_no_move=[]
+    ang_move = []
+
+    media_v =np.mean(v)
+    media_ang =np.mean(ang)
+
+    for linha in v:
+        for norma in linha:
+            if norma > media_v:
+                v_move.append(norma)
+            elif norma <= media_v:
+                v_no_move.append(norma)
+
+    for linha in ang:
+        for norma in linha:
+            if norma > media_ang:
+                ang_move.append(norma)
+            elif norma <= media_ang:
+                ang_no_move.append(norma)
+
+    if np.mean(v_move)>4:
+        print('Norma')
+        print(np.mean(v_move))
+        print('Angulo')
+        print(np.mean(ang_move))
 
     key = cv2.waitKey(5)
     if key == ord('q'):
