@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import logging as log
 
 
 # ----------------------------------------------
@@ -105,6 +106,8 @@ cap = cv2.VideoCapture(0)
 suc, prev = cap.read()
 prevgray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
 
+incendiodetetado = False
+
 while True:
 
     suc, img = cap.read()
@@ -126,10 +129,24 @@ while True:
     bgr_draw, v, ang = draw_hsv(flow)
     flow_HSV = cv2.flip(bgr_draw, 1)
 
-    cv2.imshow('Flow Masked', flow2)
-    # cv2.imshow('Flow Image', original_gray_flow)
-    cv2.imshow('RGB Image', img2)
-    # cv2.imshow('Flow HSV', flow_HSV)
+
+    M = cv2.moments(mask)
+    if M["m00"] != 0 and not incendiodetetado:
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+        cv2.circle(result, (cX, cY), 5, (255, 0, 0), -1)
+        log.warning('Incendio Detetado')
+        incendiodetetado= True
+    elif M["m00"] ==0 and incendiodetetado:
+        incendiodetetado = False
+
+
+
+    #cv2.imshow('Flow Masked', flow2)
+    #cv2.imshow('Flow Image', original_gray_flow)
+    #cv2.imshow('RGB Image', img2)
+    #cv2.imshow('Flow HSV', flow_HSV)
+    #cv2.imshow('Result', result)
 
 #Média dos vetores da matriz e apresentacao do seu valor
     v_no_move=[]
