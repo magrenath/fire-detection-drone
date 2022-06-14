@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import logging as log
-
+import timeit
 
 # ----------------------------------------------
 # FUNCTIONS
@@ -12,7 +12,7 @@ def nothing(x):
     pass
 
 
-def draw_flow(img_draw, flow_draw, step=16):
+def draw_flow(img_draw, flow_draw, step=100):
     h, w = img_draw.shape[:2]
     y, x = np.mgrid[step / 2:h:step, step / 2:w:step].reshape(2, -1).astype(int)
     fx, fy = flow_draw[y, x].T
@@ -119,7 +119,7 @@ while True:
     result_bgr = cv2.cvtColor(result, cv2.COLOR_HSV2BGR)
     gray = cv2.cvtColor(result_bgr, cv2.COLOR_BGR2GRAY)
 
-    flow = cv2.calcOpticalFlowFarneback(prevgray, original_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+    flow = cv2.calcOpticalFlowFarneback(prevgray, original_gray, None, 0.5, 1, 12, 2, 5, 1.1, 0)
     prevgray = original_gray
 
     flow2 = cv2.flip(draw_flow(gray, flow), 1)
@@ -129,7 +129,7 @@ while True:
     bgr_draw, v, ang = draw_hsv(flow)
     flow_HSV = cv2.flip(bgr_draw, 1)
 
-
+#Deteção de centroide de objeto da mascara e aviso de incendio detetado
     M = cv2.moments(mask)
     if M["m00"] != 0 and not incendiodetetado:
         cX = int(M["m10"] / M["m00"])
@@ -143,7 +143,7 @@ while True:
 
 
     #cv2.imshow('Flow Masked', flow2)
-    #cv2.imshow('Flow Image', original_gray_flow)
+    cv2.imshow('Flow Image', original_gray_flow)
     #cv2.imshow('RGB Image', img2)
     #cv2.imshow('Flow HSV', flow_HSV)
     #cv2.imshow('Result', result)
@@ -160,9 +160,11 @@ while True:
     for linha in v:
         for norma in linha:
             if norma > media_v:
+                inicio = timeit.default_timer()
                 v_move.append(norma)
             elif norma <= media_v:
                 v_no_move.append(norma)
+                fim = timeit.default_timer()
 
     for linha in ang:
         for norma in linha:
@@ -171,10 +173,12 @@ while True:
             elif norma <= media_ang:
                 ang_no_move.append(norma)
 
+    tempo: int = (fim-inicio)*10**6
+
     if np.mean(v_move)>4:
-        print('Norma')
-        print(np.mean(v_move))
-        print('Angulo')
+        print('Velocidade(Pixeis/S)')
+        print(np.mean(v_move)/tempo)
+        print('Angulo(rad)')
         print(np.mean(ang_move))
 
     key = cv2.waitKey(5)
