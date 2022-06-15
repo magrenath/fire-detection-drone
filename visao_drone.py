@@ -162,9 +162,10 @@ while True:
             if norma > media_v:
                 inicio = timeit.default_timer()
                 v_move.append(norma)
+                fim = timeit.default_timer()
             elif norma <= media_v:
                 v_no_move.append(norma)
-                fim = timeit.default_timer()
+                
 
     for linha in ang:
         for norma in linha:
