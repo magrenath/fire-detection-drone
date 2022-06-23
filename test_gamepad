@@ -1,0 +1,45 @@
+import pygame
+import time
+
+# ---------------------------------------------------------
+# Initialization
+# ---------------------------------------------------------
+
+pygame.init()
+pygame.joystick.init()
+
+# Count Joysticks
+joystick_count = pygame.joystick.get_count()
+print('Found ' + str(joystick_count) + ' joysticks.')
+if joystick_count < 1:
+    print('No joysticks found. Terminating.')
+    exit(0)
+
+joystick = pygame.joystick.Joystick(0)
+joystick_name = joystick.get_name()
+
+print('Connected to joystick named ' + joystick_name)
+
+# ---------------------------------------------------------
+# Execution in Cycle
+# ---------------------------------------------------------
+
+while True:
+    Y = joystick.get_axis(0)
+    T = -joystick.get_axis(1)
+    P = -joystick.get_axis(3)
+    R = joystick.get_axis(2)
+    A = joystick.get_button(0)
+
+    pygame.event.pump()
+
+    print('Y ' + str(Y) + '; T ' + str(T) + '; R ' + str(R) + '; P ' + str(P) + '; A ' + str(A))
+
+    # Message Frequency
+    time.sleep(0.1)
+
+# ---------------------------------------------------------
+# Termination
+# ---------------------------------------------------------
+
+pygame.quit()
