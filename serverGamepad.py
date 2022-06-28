@@ -1,7 +1,7 @@
 import socket
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('192.168.35.214', 10000)
+server_address = ('192.168.1.66', 10000)
 print('starting up on {} port {}'.format(*server_address))
 sock.bind(server_address)
 

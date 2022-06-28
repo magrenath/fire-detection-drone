@@ -6,7 +6,7 @@ import time
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
-server_address = ('192.168.35.214', 10000)
+server_address = ('192.168.1.66', 10000)
 print('Connecting to {} port {}'.format(*server_address))
 sock.connect(server_address)
 
@@ -48,7 +48,6 @@ while True:
     # SendData
     # -------------------------------------
 
-    byt1 = message.encode()
-    sock.send(byt1)
+    sock.send(message.encode())
 
     time.sleep(0.5)
